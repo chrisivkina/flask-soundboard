@@ -1,0 +1,149 @@
+:root {
+    /* https://www.happyhues.co/palettes/4 */
+
+    /* Elements */
+    --background: #16161a;
+    --button: #575757;
+    --button-hover: #6c4bd8;
+    --headline: #fffffe;
+    --paragraph: #94a1b2;
+    --headline-dark: #010101;
+    --button-text: #fffffe;
+
+    /* Stroke */
+    --stroke: #010101;
+    --secondary: #72757e;
+    --main: #272727;
+    --tertiary: #2cb67d;
+    --highlight: #7f5af0;
+
+    /* Custom */
+    --button-good: #137800;
+    --button-bad: #c50000;
+}
+
+body, html {
+    margin: 0;
+    padding: 0;
+    font-family: 'Roboto', sans-serif;
+    background-color: var(--background);
+    color: var(--headline);
+}
+
+* {
+    touch-action: manipulation;
+    -webkit-user-select: none; /* Safari */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* IE10+/Edge */
+    user-select: none; /* Standard */
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    grid-gap: 10px;
+}
+
+.grid-1x4 {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-gap: 10px;
+}
+
+.grid-1x3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-gap: 10px;
+}
+
+.grid-1x2 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-gap: 10px;
+}
+
+.grid-1x1 {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    grid-gap: 10px;
+}
+
+button {
+    padding: 20px;
+    margin: 10px;
+    background-color: var(--button);
+    border: 2px solid #000;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 2rem;
+}
+
+.slider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 80px;
+  background: rgb(0,172,33);
+    background: linear-gradient(90deg, rgba(0,172,33,0.7) 0%, rgba(255,242,0,0.7) 65%, rgba(255,0,0,0.7) 100%);
+  outline: none;
+  -webkit-transition: .2s;
+  transition: opacity .2s;
+    border-radius:12px;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 80px;
+  height: 80px;
+  background: var(--button);
+  cursor: pointer;
+    border-radius:12px;
+    background: url('/static/volume.png') no-repeat center;
+  background-size: cover;
+    border: var(--highlight) 8px solid;
+
+}
+
+.slider::-moz-range-thumb {
+  width: 80px;
+  height: 80px;
+  background: var(--button);
+  cursor: pointer;
+    border-radius:12px;
+    background: url('/static/volume.png') no-repeat center;
+  background-size: cover;
+    border: #fff 8px solid;
+
+}
+
+.sound_button {
+    padding: 15px;
+    margin: 10px;
+    background-color: var(--main);
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 20px;
+    text-align: center;
+    text-transform: capitalize;
+}
+
+.fixed-footer {
+    background-color: var(--main);
+    position: sticky;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    text-align: center;
+    border-top: 2px solid var(--highlight);
+    padding-bottom: 10px;
+}
+
+.flex-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* Ensures the container takes full height */
+}
+
+.flex-content {
+  flex: 1; /* Pushes the footer down if content is short */
+}

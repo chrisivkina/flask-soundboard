@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Soundboard</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+    <style>
+        img {
+            width: 48px;
+            height: 48px;
+        }
+    </style>
+</head>
+<body style="height:100%;margin:0;">
+    <div class="flex-container">
+        <div class="flex-content">
+            <div class="grid-1x2">
+                <button onclick="toggleFullScreen()" style="padding:10px !important;font-size:1rem;background-color: var(--main);color:var(--headline)">Toggle Full Screen</button>
+                <button onclick="location.reload()" style="padding:10px !important;font-size:1rem;background-color: var(--main);color:var(--headline)">Refresh</button>
+            </div>
+
+            <div class="grid-1x3">
+                <button style="padding:20px !important;"  id="loop_button" onclick="postChangeParameter('loop')">
+                    <img id="loop_button_img" src="{{ url_for('static', filename='loop.png') }}" alt="Loop">
+                </button>
+
+                <button style="padding:20px !important;"  id="keyboard_button" onclick="postChangeParameter('do_push_to_talk')">
+                    <img id="keyboard_button_img" src="{{ url_for('static', filename='keyboard.png') }}" alt="Loop">
+                </button>
+
+                <button style="padding:20px !important;"  id="sim_button" onclick="postChangeParameter('simultaneous')">
+                    <img id="sim_button_img" src="{{ url_for('static', filename='split.png') }}" alt="Simultaneous">
+                </button>
+            </div>
+
+            <br>
+            <div class="grid">
+                {% for sound in sounds %}
+                    {% if sound not in sounds_category_2 %}
+                        <div class="sound_button" onclick="postSound('{{ sound.name }}')">{{ sound.name }}</div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+
+            {% if sounds_category_2 %}
+                <br>
+                <div class="grid">
+                    {% for sound in sounds_category_2 %}
+                        <div class="sound_button" onclick="postSound('{{ sound.name }}')">{{ sound.name }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+        <div class="fixed-footer">
+            <div class="grid-1x3">
+                <button onclick="postAction('stop')" style="padding:10px !important;">
+                    <img id="stop_button_img" src="{{ url_for('static', filename='stop.png') }}" alt="Stop">
+                </button>
+                {% if paused %}
+                    <button id="pause_resume" style="padding:10px !important;" onclick="postAction('pause_or_resume')">
+                        <img id="pause_button_img" src="{{ url_for('static', filename='play.png') }}" alt="Resume">
+                    </button>
+                {% else %}
+                    <button id="pause_resume" style="padding:10px !important;" onclick="postAction('pause_or_resume')">
+                        <img id="pause_button_img" src="{{ url_for('static', filename='pause.png') }}" alt="Resume">
+                    </button>
+                {% endif %}
+                <button style="padding:10px !important;" onclick="postAction('random')">
+                    <img id="shuffle_button_img" src="{{ url_for('static', filename='shuffle.png') }}" alt="Random">
+                </button>
+            </div>
+
+            <div class="grid-1x1" style="margin-top:10px;border-radius:8px;margin-left:10px;margin-right: 10px;">
+                <input id="volume" type="range" min="0" max="127" value="{{ volume }}" class="slider">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const play_img = "{{ url_for('static', filename='play.png') }}";
+        const pause_img = "{{ url_for('static', filename='pause.png') }}";
+        const loop_img = "{{ url_for('static', filename='loop.png') }}";
+        const shuffle_img = "{{ url_for('static', filename='shuffle.png') }}";
+        const stop_img = "{{ url_for('static', filename='stop.png') }}";
+        const split_img = "{{ url_for('static', filename='split.png') }}";
+        const keyboard_img = "{{ url_for('static', filename='keyboard.png') }}";
+
+        document.getElementById('volume').addEventListener('input', postVolumeChange);
+
+        {% if simultaneous %}
+            let sim = true;
+        {% else %}
+            let sim = false;
+        {% endif %}
+
+        {% if loop %}
+            let loop = true;
+        {% else %}
+            let loop = false;
+        {% endif %}
+
+        {% if paused %}
+            let paused = true;
+        {% else %}
+            let paused = false;
+        {% endif %}
+
+        {% if do_push_to_talk %}
+            let do_push_to_talk = true;
+        {% else %}
+            let do_push_to_talk = false;
+        {% endif %}
+
+        syncButtonColorsWithSettings();
+        refreshSettings();
+    </script>
+</body>
+</html>

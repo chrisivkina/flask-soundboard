@@ -1,0 +1,5 @@
+sfx/
+__pycache__/
+.venv/
+.idea/
+bin/
