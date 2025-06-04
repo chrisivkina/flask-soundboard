@@ -7,7 +7,7 @@ from keyboard_lib import vk
 logging.basicConfig(
     level=logging.INFO,
     format='[%(asctime)s](%(filename)s).%(funcName)s(%(lineno)d)[%(levelname)s] %(message)s',
-    handlers=[logging.StreamHandler(sys.stdout), logging.FileHandler('../python-soundboard/soundboard.log')]
+    handlers=[logging.StreamHandler(sys.stdout), logging.FileHandler('soundboard.log')]
 )
 
 sfx_dir = os.path.join(os.getcwd(), 'sfx')

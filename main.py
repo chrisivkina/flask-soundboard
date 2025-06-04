@@ -1,9 +1,17 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, send_from_directory
 import atexit
+import json
+import os
 
 import sound_lib
 import sbsdl2 as sound_backend
 from common import *
+
+# Path to the layout settings file
+SETTINGS_FILE = os.path.join(os.path.dirname(__file__), 'data', 'layout_settings.json')
+
+# Create data directory if it doesn't exist
+os.makedirs(os.path.dirname(SETTINGS_FILE), exist_ok=True)
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(24)
@@ -13,18 +21,16 @@ app.config['DEBUG'] = True
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 
 
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory('static', 'favicon.ico', mimetype='image/vnd.microsoft.icon')
+
+
 @app.route('/')
 def index():  # put application's code here
-    sounds_category_2 = []
-
-    for i, s in enumerate(sounds):
-        if s.name.endswith('_s'):
-            sounds_category_2.append(sounds[i])
-
     return render_template(
         'index.html',
         sounds=sounds,
-        sounds_category_2=sounds_category_2,
         volume=sound_lib.get_volume(),
         simultaneous=simultaneous.get(),
         loop=loop.get(),
@@ -107,6 +113,102 @@ def get_settings():
         'do_push_to_talk': do_push_to_talk.get(),
         'volume': sound_lib.get_volume()
     }
+
+
+@app.route('/update_sound_category', methods=['POST'])
+def update_sound_category():
+    if 'name' not in request.json or 'category' not in request.json:
+        return 'Missing required fields', 400
+
+    name = request.json['name']
+    category = request.json['category']
+
+    # Here you would update your sound data structure or database
+    # For now we just acknowledge the request
+    logging.info(f"Updated sound {name} to category {category}")
+
+    return 'Category updated'
+
+
+@app.route('/delete_sound', methods=['POST'])
+def delete_sound():
+    if 'name' not in request.json:
+        return 'No sound name provided', 400
+
+    name = request.json['name']
+
+    # Get the file path and remove it
+    file_path = os.path.join(sfx_dir, name + '.mp3')
+    if os.path.exists(file_path):
+        os.remove(file_path)
+        # Update the sounds list
+        global sfx_files
+        sfx_files = os.listdir(sfx_dir)
+        populate_sounds()
+        logging.info(f"Deleted sound {name}")
+        return 'Sound deleted'
+    else:
+        return 'Sound not found', 404
+
+
+@app.route('/update_category_order', methods=['POST'])
+def update_category_order():
+    if 'categories' not in request.json:
+        return 'No categories provided', 400
+
+    categories = request.json['categories']
+    # Store this information in your application's state or database
+    logging.info(f"Updated category order: {categories}")
+
+    return 'Category order updated'
+
+
+def get_layout_settings():
+    """Load layout settings from file or return defaults if file doesn't exist"""
+    if not os.path.exists(SETTINGS_FILE):
+        return {
+            "layoutMode": "vertical",
+            "categoryWidths": {},
+            "categoryOrder": []
+        }
+
+    try:
+        with open(SETTINGS_FILE, 'r') as f:
+            return json.load(f)
+    except Exception as e:
+        logging.error(f"Error loading layout settings: {e}")
+        return {
+            "layoutMode": "vertical",
+            "categoryWidths": {},
+            "categoryOrder": []
+        }
+
+
+def save_layout_settings(settings):
+    """Save layout settings to file"""
+    try:
+        with open(SETTINGS_FILE, 'w') as f:
+            json.dump(settings, f, indent=2)
+        return True
+    except Exception as e:
+        logging.error(f"Error saving layout settings: {e}")
+        return False
+
+
+@app.route('/get_layout_settings', methods=['GET'])
+def get_settings_endpoint():
+    return get_layout_settings()
+
+
+@app.route('/save_layout_settings', methods=['POST'])
+def save_settings_endpoint():
+    if not request.json:
+        return 'Invalid settings data', 400
+
+    if save_layout_settings(request.json):
+        return 'Settings saved successfully'
+    else:
+        return 'Error saving settings', 500
 
 
 def get_sound_class_by_name(name):

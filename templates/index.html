@@ -5,7 +5,10 @@
     <title>Soundboard</title>
 
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/layout.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/categories.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/controls.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 
     <style>
         img {
@@ -17,8 +20,11 @@
 <body style="height:100%;margin:0;">
     <div class="flex-container">
         <div class="flex-content">
-            <div class="grid-1x2">
+            <div class="grid-1x3">
                 <button onclick="toggleFullScreen()" style="padding:10px !important;font-size:1rem;background-color: var(--main);color:var(--headline)">Toggle Full Screen</button>
+                <button id="layout_toggle_button" style="padding:10px !important;font-size:1rem;background-color: var(--highlight);color:var(--headline);border-radius:8px;">
+                    Switch to Horizontal Layout
+                </button>
                 <button onclick="location.reload()" style="padding:10px !important;font-size:1rem;background-color: var(--main);color:var(--headline)">Refresh</button>
             </div>
 
@@ -38,21 +44,8 @@
 
             <br>
             <div class="grid">
-                {% for sound in sounds %}
-                    {% if sound not in sounds_category_2 %}
-                        <div class="sound_button" onclick="postSound('{{ sound.name }}')">{{ sound.name }}</div>
-                    {% endif %}
-                {% endfor %}
+                <!-- Sound buttons will be rendered by JS after layout settings are loaded -->
             </div>
-
-            {% if sounds_category_2 %}
-                <br>
-                <div class="grid">
-                    {% for sound in sounds_category_2 %}
-                        <div class="sound_button" onclick="postSound('{{ sound.name }}')">{{ sound.name }}</div>
-                    {% endfor %}
-                </div>
-            {% endif %}
         </div>
         <div class="fixed-footer">
             <div class="grid-1x3">
@@ -119,3 +112,4 @@
     </script>
 </body>
 </html>
+

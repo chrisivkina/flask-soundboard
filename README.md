@@ -4,13 +4,14 @@ An HTML / Python Flask sound effect player
 ## Description
 This is a simple soundboard application built using Flask and HTML. 
 It allows users to play sound effects by clicking on buttons. The intended
-use is to have a seperate device (like a phone or tablet) to play sound effects on.
+use is to have a seperate device (like a phone or tablet) to play sound effects on,
+but it can also be used on the same device as the server. The soundboard UI is hosted
+on a web server, which can be accessed from any device on the same network.
 
 ## Planned Features
-- Installation Guide
+- Installation guide
 - Use Flask-SocketIO instead of HTTP requests
-- Allow change of sound device
-- Light theme
+- Add settings menu (for changing sound device and more)
 
 (And much more!)
 

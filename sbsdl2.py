@@ -130,28 +130,7 @@ def get_volume():
     return current_volume
 
 
-def choose_device(iterable: list[bytes], choice_title='Choose Device'):
-    root2 = tk.CTk()
-    root2.title = choice_title
-    root2.config(bg='black')
-    root2.columnconfigure(1, weight=1)
-    root2.rowconfigure(0, weight=1)
-    ret = tk.IntVar(value=0)
-
-    def choose(number):
-        ret.set(number)
-        root2.destroy()
-
-    tk.CTkLabel(root2, text='Several usable devices have been found. Please choose your preferred device.').grid(column=1, row=0)
-    for i, x in enumerate(iterable):
-        tk.CTkLabel(root2, text=str(i)).grid(column=0, row=i + 1)
-        tk.CTkButton(root2, text=x.decode(), command=lambda l=i: choose(l)).grid(column=1, row=i + 1)
-
-    root2.mainloop()
-    return ret.get()
-
-
-def find_audio_device(keyword, choice_title='Choose Device', recording_device=False):
+def find_audio_device(keyword, recording_device=False):
     all_devices = get_audio_devices(recording_device)
 
     relevant_devices = []
@@ -164,29 +143,9 @@ def find_audio_device(keyword, choice_title='Choose Device', recording_device=Fa
 
     if len(relevant_devices) > 1:
         logging.warning(f'Multiple ({len(relevant_devices)}) usable devices detected.')
-        c = choose_device(relevant_devices, choice_title)
-        return relevant_devices[c]
+        return relevant_devices[0]
 
     return relevant_devices[0]
-
-
-def find_stereo_mix():
-    all_devices = get_audio_devices(True)
-
-    stereomix_name = find_audio_device(
-        'stereo mix',
-        choice_title='Choose Stereo Mix Device',
-        recording_device=True
-    )
-    if stereomix_name is None:
-        return None
-
-    index = all_devices.index(stereomix_name)
-
-    if index >= 0:
-        return index + 1
-    else:
-        return None
 
 
 def get_default_audio_stats():

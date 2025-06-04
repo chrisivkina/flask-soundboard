@@ -42,6 +42,7 @@ body, html {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     grid-gap: 10px;
+    width: 100%;
 }
 
 .grid-1x4 {
@@ -116,17 +117,6 @@ button {
 
 }
 
-.sound_button {
-    padding: 15px;
-    margin: 10px;
-    background-color: var(--main);
-    border-radius: 12px;
-    cursor: pointer;
-    font-size: 20px;
-    text-align: center;
-    text-transform: capitalize;
-}
-
 .fixed-footer {
     background-color: var(--main);
     position: sticky;
@@ -136,6 +126,7 @@ button {
     text-align: center;
     border-top: 2px solid var(--highlight);
     padding-bottom: 10px;
+    z-index: 1000; /* Ensure footer is above other content */
 }
 
 .flex-container {
@@ -147,3 +138,175 @@ button {
 .flex-content {
   flex: 1; /* Pushes the footer down if content is short */
 }
+
+.context-menu {
+    position: fixed;
+    background-color: var(--main);
+    border: 2px solid var(--highlight);
+    border-radius: 12px;
+    min-width: 200px;
+    z-index: 1000;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.context-menu-item {
+    padding: 12px 15px;
+    cursor: pointer;
+    font-size: 16px;
+    color: var(--headline);
+    border-bottom: 1px solid var(--secondary);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.context-menu-item:last-child {
+    border-bottom: none;
+}
+
+.context-menu-item:hover {
+    background-color: var(--button-hover);
+}
+
+.category-header {
+    background-color: var(--highlight);
+    padding: 10px;
+    margin: 20px 40px 10px 20px;
+    border-radius: 8px;
+    font-weight: bold;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.draggable {
+    cursor: grab;
+}
+
+.dragging {
+    opacity: 0.5;
+    cursor: grabbing;
+}
+
+.category-input {
+    background-color: var(--main);
+    color: var(--headline);
+    border: 1px solid var(--highlight);
+    padding: 8px;
+    border-radius: 8px;
+    margin-top: 5px;
+}
+
+.categories-container {
+    display: flex;
+    flex-direction: column;
+    width: 100vw; /* Use 100vw as requested */
+    box-sizing: border-box;
+    gap: 20px; /* Use gap for spacing instead of margin on children */
+}
+
+.categories-container[data-layout="horizontal"] {
+    flex-direction: row;
+    align-items: stretch;
+    align-content: flex-start;
+}
+
+.categories-container[data-layout="horizontal"] .category-container {
+    flex: 0 0 auto; /* Don't grow, don't shrink, base size on content */
+    min-width: 180px;
+    max-width: none; /* Remove max-width restriction */
+    width: auto !important; /* Force override with !important */
+}
+
+.category-container .resize-handle {
+    display: none;
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 12px; /* Increased for easier dragging */
+    height: 100%;
+    background-color: var(--highlight);
+    cursor: col-resize;
+    z-index: 2;
+}
+
+.categories-container[data-layout="horizontal"] .category-container .resize-handle {
+    display: block;
+}
+
+/* Sound button container using CSS Grid */
+.sound-buttons-container {
+    display: grid;
+    /* Creates columns of minimum 180px that expand to fill space until a new column fits */
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    /*gap: 20px;*/
+    width: 100%;
+    padding: 10px;
+    margin-right: 40px;
+}
+
+/* Sound button styles */
+.sound_button {
+    padding: 15px;
+    margin: 0;
+    background-color: var(--main);
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 20px;
+    text-align: center;
+    text-transform: capitalize;
+}
+
+/* Consistent layout for horizontal mode */
+.categories-container[data-layout="horizontal"] .sound-buttons-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    /*gap: 0px;*/
+    /*width: 100%;*/
+}
+
+/* Ensure resize handle still works properly */
+.category-container {
+    margin-bottom: 0;
+    margin-left: 0;
+    position: relative;
+    min-width: 180px;
+    width: 100%; /* Changed from 100vw to 100% */
+    box-sizing: border-box;
+}
+
+/* In vertical mode, make sure category containers and sound-buttons use full width */
+.categories-container:not([data-layout="horizontal"]) .category-container {
+    width: 100vw !important;
+    flex: 1 1 100vw;
+    min-width: 0;
+}
+
+.categories-container:not([data-layout="horizontal"]) .sound-buttons-container {
+    width: 100% !important;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+/* In horizontal mode, let category containers flex to fill space unless user-resized */
+.categories-container[data-layout="horizontal"] {
+    flex-direction: row;
+    align-items: stretch;
+    align-content: flex-start;
+}
+
+.categories-container[data-layout="horizontal"] .category-container {
+    flex: 1 1 0;
+    /*min-width: 180px;*/
+    max-width: 100%;
+    width: auto;
+    /* If a width is set inline (by resize), it will override this */
+}
+
+/* Override existing styles for horizontal layout */
+.categories-container[data-layout="horizontal"] .sound_button {
+    margin: 5px;
+    /*width: 180px;*/
+    flex-grow: 0;
+    flex-shrink: 0;
+}
+

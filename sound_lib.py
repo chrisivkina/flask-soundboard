@@ -9,9 +9,18 @@ class Sound:
         self.file = file
         self.name = file.split('.')[0]
         self.path = str(os.path.join(sfx_dir, self.file))
-        self.chunk = None
         self.hotkey = None
-        # self.calculated_duration = (self.chunk.alen / ((44100 * 4) / 1000)) / 1000
+
+        # Load the chunk immediately to calculate duration
+        self.chunk = sbsdl2.load_sound(self.path)
+
+        # Calculate duration in seconds
+        # Using format parameters from sbsdl2.init():
+        # - Sample rate: 44100 Hz
+        # - Channels: 2 (stereo)
+        # - Format: 16-bit (2 bytes per sample)
+        bytes_per_second = 44100 * 2 * 2  # sample_rate * channels * bytes_per_sample
+        self.calculated_duration = self.chunk.alen / bytes_per_second
 
     def set_hotkey(self, parsable):
         self.hotkey = parsable
@@ -20,9 +29,6 @@ class Sound:
         self.hotkey = None
 
     def play(self):
-        if self.chunk is None:
-            self.chunk = sbsdl2.load_sound(self.path)
-
         play(self.chunk)
 
 
