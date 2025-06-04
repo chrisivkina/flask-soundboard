@@ -1,7 +1,5 @@
 import sys, os
 import logging
-import threading
-import random
 from keyboard_lib import vk
 
 logging.basicConfig(
