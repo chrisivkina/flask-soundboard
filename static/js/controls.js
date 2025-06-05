@@ -6,7 +6,7 @@ socket.on('connect', function() {
 });
 
 socket.on('settings', function(data) {
-    sim = data.sim;
+    sim = data.simultaneous;
     loop = data.loop;
     do_push_to_talk = data.do_push_to_talk;
     paused = data.paused;
@@ -48,16 +48,6 @@ function requestSoundList() {
 }
 
 function postChangeParameter(parameter) {
-    if (parameter === 'simultaneous') {
-        sim = !sim;
-    } else if (parameter === 'loop') {
-        loop = !loop;
-    } else if (parameter === 'do_push_to_talk') {
-        do_push_to_talk = !do_push_to_talk;
-    }
-
-    updateButtonColors();
-
     socket.emit('toggle_parameter', { parameter: parameter });
 }
 

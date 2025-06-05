@@ -37,15 +37,15 @@
             </div>
 
             <div class="grid-1x3">
-                <button style="padding:20px !important;"  id="loop_button" onclick="postChangeParameter('loop')">
+                <button style="padding:20px !important;"  id="loop_button" onclick="postChangeParameter('loop')" title='Toggle loop on/off'>
                     <img id="loop_button_img" src="{{ url_for('static', filename='loop.png') }}" alt="Loop">
                 </button>
 
-                <button style="padding:20px !important;"  id="keyboard_button" onclick="postChangeParameter('do_push_to_talk')">
-                    <img id="keyboard_button_img" src="{{ url_for('static', filename='keyboard.png') }}" alt="Loop">
+                <button style="padding:20px !important;"  id="keyboard_button" onclick="postChangeParameter('do_push_to_talk')" title='Toggle push-to-talk'>
+                    <img id="keyboard_button_img" src="{{ url_for('static', filename='keyboard.png') }}" alt="Push to Talk">
                 </button>
 
-                <button style="padding:20px !important;"  id="sim_button" onclick="postChangeParameter('simultaneous')">
+                <button style="padding:20px !important;"  id="sim_button" onclick="postChangeParameter('simultaneous')" title='Toggle simultaneous playback'>
                     <img id="sim_button_img" src="{{ url_for('static', filename='split.png') }}" alt="Simultaneous">
                 </button>
             </div>
