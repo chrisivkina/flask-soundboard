@@ -25,10 +25,9 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(24)
 socket = SocketIO(app, cors_allowed_origins='*')
 
-
-@app.route('/favicon.ico')
-def favicon():
-    return send_from_directory('static', 'favicon.ico', mimetype='image/vnd.microsoft.icon')
+# Load sound files from the sfx directory
+sfx_files = os.listdir(sfx_dir)
+sounds = []
 
 
 @app.route('/')
@@ -126,24 +125,6 @@ def handle_random_sound():
     logging.debug('Random sound played')
 
 
-def compile_settings():
-    """Compile the current settings into a dictionary."""
-    return {
-        'simultaneous': simultaneous.get(),
-        'loop': loop.get(),
-        'do_push_to_talk': do_push_to_talk.get(),
-        'volume': sound_lib.get_volume(),
-        'paused': sound_lib.is_paused()
-    }
-
-
-def send_settings():
-    """Send the current settings to all connected clients."""
-    settings = compile_settings()
-    socket.emit('settings', settings)
-    logging.debug('Sent current settings to all clients')
-
-
 @socket.on('get_settings')
 def handle_get_settings():
     """Send the current settings to the client."""
@@ -168,15 +149,24 @@ def handle_update_sound_category(data):
 @socket.on('delete_sound')
 def handle_delete_sound(data):
     """Handle the delete sound event from the client."""
+    global sfx_files
+
     if 'name' not in data:
         logging.error('No sound name provided in delete_sound event')
         return
 
     name = data['name']
-    file_path = os.path.join(sfx_dir, name + '.mp3')
-    if os.path.exists(file_path):
+
+    file_path = None
+
+    # Find the sound file in the sfx directory, any file with the same name (without extension)
+    for f in sfx_files:
+        if os.path.splitext(f)[0] == name:
+            file_path = os.path.join(sfx_dir, f)
+            break
+
+    if file_path and os.path.exists(file_path):
         os.remove(file_path)
-        global sfx_files
         sfx_files = os.listdir(sfx_dir)
         populate_sounds()
         logging.info(f"Deleted sound {name}")
@@ -218,6 +208,24 @@ def handle_save_layout_settings(data):
         logging.error('Error saving layout settings')
 
 
+def send_settings():
+    """Send the current settings to all connected clients."""
+    settings = compile_settings()
+    socket.emit('settings', settings)
+    logging.debug('Sent current settings to all clients')
+
+
+def compile_settings():
+    """Compile the current settings into a dictionary."""
+    return {
+        'simultaneous': simultaneous.get(),
+        'loop': loop.get(),
+        'do_push_to_talk': do_push_to_talk.get(),
+        'volume': sound_lib.get_volume(),
+        'paused': sound_lib.is_paused()
+    }
+
+
 def get_layout_settings():
     """Load layout settings from file or return defaults if file doesn't exist"""
     if not os.path.exists(SETTINGS_FILE):
@@ -255,6 +263,14 @@ def get_sound_class_by_name(name):
     return sounds[idx]
 
 
+def populate_sounds():
+    global sounds
+
+    sounds = []
+    for sound in sfx_files:
+        sounds.append(sound_lib.Sound(sound))
+
+
 def run():
     sound_backend.init()
 
@@ -264,29 +280,8 @@ def run():
     socket.run(app, host='0.0.0.0', port=8080, debug=True, allow_unsafe_werkzeug=True)
 
 
-sfx_files = os.listdir(sfx_dir)
-
-
-def populate_sounds():
-    global sounds
-
-    sounds = []
-    for sound in sfx_files:
-        sounds.append(sound_lib.Sound(sound))
-
-
-sounds = []
+# Load sound files from the sfx directory
 populate_sounds()
-
-
-def get_sounds():
-    global sfx_files
-
-    new_files = os.listdir(sfx_dir)
-    if new_files != sfx_files:
-        populate_sounds()
-        sfx_files = new_files
-    return sounds
 
 
 if __name__ == '__main__':
