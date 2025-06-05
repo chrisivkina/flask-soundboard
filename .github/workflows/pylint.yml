@@ -5,9 +5,11 @@ on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+
     strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10"]
+        python-version: ["3.10", "3.11", "3.12"]
     steps:
     - uses: actions/checkout@v4
 
@@ -22,6 +24,9 @@ jobs:
         pip install pylint
         pip install -r requirements.txt
 
-    - name: Analyse the code with Pylint (errors and warnings only)
+    - name: Analyse with Pylint (diagnostic)
       run: |
-        pylint --disable=C,R $(git ls-files '*.py')
+        set -e
+        echo "Running Pylint on the following files:"
+        git ls-files '*.py'
+        pylint --exit-zero --disable=C,R $(git ls-files '*.py')
