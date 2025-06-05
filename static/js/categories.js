@@ -254,26 +254,6 @@ function setCategory(soundName, category) {
     }
 }
 
-function deleteSound(soundName) {
-    if (confirm(`Are you sure you want to delete "${soundName}"?`)) {
-        fetch('/delete_sound', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({name: soundName})
-        }).then(response => {
-            if (response.ok) {
-                // Remove from localStorage and refresh the view
-                const sounds = JSON.parse(localStorage.getItem('soundCategories'));
-                const updatedSounds = sounds.filter(s => s.name !== soundName);
-                localStorage.setItem('soundCategories', JSON.stringify(updatedSounds));
-                organizeSoundsByCategory();
-            }
-        });
-    }
-}
-
 function getSoundData(name) {
     const sounds = JSON.parse(localStorage.getItem('soundCategories'));
     const sound = sounds.find(s => s.name === name);

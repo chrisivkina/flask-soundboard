@@ -13,6 +13,17 @@ logging.basicConfig(
     handlers=[logging.StreamHandler(sys.stdout), logging.FileHandler('soundboard.log')]
 )
 
+# SDL2 DLL path setup, this works for both normal execution and PyInstaller builds
+os.environ['PYSDL2_DLL_PATH'] = os.path.join(
+    getattr(
+        sys,
+        '_MEIPASS',
+        os.path.dirname(os.path.abspath(__file__))
+    ),
+    'bin',
+    'sdl2'
+)
+
 sfx_dir = os.path.join(os.getcwd(), 'sfx')
 
 

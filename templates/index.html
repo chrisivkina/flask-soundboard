@@ -18,17 +18,22 @@
             width: 48px;
             height: 48px;
         }
+
+        .config-button {
+            padding:10px !important;
+            font-size:1rem;
+            background-color: var(--main);
+            color:var(--headline);
+        }
     </style>
 </head>
 <body style="height:100%;margin:0;">
     <div class="flex-container">
         <div class="flex-content">
             <div class="grid-1x3">
-                <button onclick="toggleFullScreen()" style="padding:10px !important;font-size:1rem;background-color: var(--main);color:var(--headline)">Toggle Full Screen</button>
-                <button id="layout_toggle_button" style="padding:10px !important;font-size:1rem;background-color: var(--highlight);color:var(--headline);border-radius:8px;">
-                    Switch to Horizontal Layout
-                </button>
-                <button onclick="location.reload()" style="padding:10px !important;font-size:1rem;background-color: var(--main);color:var(--headline)">Refresh</button>
+                <button onclick="toggleFullScreen()" class="config-button">Toggle Full Screen</button>
+                <button id="layout_toggle_button" class="config-button">Switch to Horizontal Layout</button>
+                <button onclick="" class="config-button">Settings</button>
             </div>
 
             <div class="grid-1x3">
@@ -84,7 +89,7 @@
         const split_img = "{{ url_for('static', filename='split.png') }}";
         const keyboard_img = "{{ url_for('static', filename='keyboard.png') }}";
 
-        document.getElementById('volume').addEventListener('input', postVolumeChange);
+        document.getElementById('volume').addEventListener('change', postVolumeChange);
 
         {% if simultaneous %}
             let sim = true;
@@ -110,7 +115,6 @@
             let do_push_to_talk = false;
         {% endif %}
 
-        syncButtonColorsWithSettings();
         refreshSettings();
     </script>
 </body>

@@ -25,6 +25,7 @@ on a web server, which can be accessed from any device on the same network.
 - Server-client communication via socket.io to reduce latency and network load
 - Automatically press a specific push-to-talk button (F20) while a sound is playing
 - Functionality to turn off/on concurrent playing of sounds (e.g. off means that if a sound is already playing, it will stop before starting a new one)
+- Automatically detects and uses a VB-Cable virtual audio device if available, otherwise uses the default audio device
 
 ## Planned Features
 - Installation guide

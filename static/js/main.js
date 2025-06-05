@@ -1,12 +1,5 @@
 let fullScreenState = false;
 
-// Connect to Socket.IO server at current window location
-const socket = io(window.location.origin);
-
-socket.on('connect', function() {
-    console.log('Connected to socket server');
-});
-
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize sounds data structure if not already in localStorage
     if (!localStorage.getItem('soundCategories')) {

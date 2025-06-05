@@ -10,9 +10,10 @@ import json
 import os
 import logging
 
+# common must be imported first, it defines DLL_PATH which is used by sbsdl2
+from common import simultaneous, loop, do_push_to_talk, sfx_dir
 import sound_lib
 import sbsdl2 as sound_backend
-from common import simultaneous, loop, do_push_to_talk, sfx_dir
 
 # Path to the layout settings file
 SETTINGS_FILE = os.path.join(os.path.dirname(__file__), 'data', 'layout_settings.json')
@@ -84,6 +85,7 @@ def handle_toggle_parameter(data):
         return
 
     logging.debug(f'Toggled parameter: {parameter}')
+    socket.emit('settings', compile_settings())  # Refresh settings for all clients
 
 
 @socket.on('set_volume')
@@ -112,11 +114,11 @@ def handle_stop():
 def handle_random_sound():
     """Play a random sound from the available sounds."""
     sound_lib.random_sound(sounds)
-    logging.debug('Played random sound')
+    logging.debug('Random sound played')
 
 
-@app.route('/get_settings', methods=['POST'])
-def get_settings():
+def compile_settings():
+    """Compile the current settings into a dictionary."""
     return {
         'simultaneous': simultaneous.get(),
         'loop': loop.get(),
@@ -125,17 +127,17 @@ def get_settings():
     }
 
 
+def send_settings():
+    """Send the current settings to all connected clients."""
+    settings = compile_settings()
+    socket.emit('settings', settings)
+    logging.debug('Sent current settings to all clients')
+
+
 @socket.on('get_settings')
 def handle_get_settings():
     """Send the current settings to the client."""
-    settings = {
-        'simultaneous': simultaneous.get(),
-        'loop': loop.get(),
-        'do_push_to_talk': do_push_to_talk.get(),
-        'volume': sound_lib.get_volume()
-    }
-    socket.emit('settings', settings)
-    logging.debug('Sent current settings to client')
+    send_settings()
 
 
 @app.route('/update_sound_category', methods=['POST'])
@@ -153,37 +155,37 @@ def update_sound_category():
     return 'Category updated'
 
 
-@app.route('/delete_sound', methods=['POST'])
-def delete_sound():
-    if 'name' not in request.json:
-        return 'No sound name provided', 400
+@socket.on('delete_sound')
+def handle_delete_sound(data):
+    """Handle the delete sound event from the client."""
+    if 'name' not in data:
+        logging.error('No sound name provided in delete_sound event')
+        return
 
-    name = request.json['name']
-
-    # Get the file path and remove it
+    name = data['name']
     file_path = os.path.join(sfx_dir, name + '.mp3')
     if os.path.exists(file_path):
         os.remove(file_path)
-        # Update the sounds list
         global sfx_files
         sfx_files = os.listdir(sfx_dir)
         populate_sounds()
         logging.info(f"Deleted sound {name}")
-        return 'Sound deleted'
+        socket.emit('sound_deleted', {'name': name})
     else:
-        return 'Sound not found', 404
+        logging.error(f'Sound not found: {name}')
 
 
-@app.route('/update_category_order', methods=['POST'])
-def update_category_order():
-    if 'categories' not in request.json:
-        return 'No categories provided', 400
+@socket.on('update_category_order')
+def handle_update_category_order(data):
+    """Handle the update category order event from the client."""
+    if 'categories' not in data:
+        logging.error('No categories provided in update_category_order event')
+        return
 
-    categories = request.json['categories']
-    # Store this information in your application's state or database
-    logging.info(f"Updated category order: {categories}")
-
-    return 'Category order updated'
+    categories = data['categories']
+    # Here you would update your sound data structure or database
+    # For now we just acknowledge the request
+    logging.debug(f"Updated category order: {categories}")
 
 
 def get_layout_settings():
@@ -232,6 +234,19 @@ def save_settings_endpoint():
         return 'Settings saved successfully'
     else:
         return 'Error saving settings', 500
+
+
+@socket.on('save_layout_settings')
+def handle_save_layout_settings(data):
+    """Handle the save layout settings event from the client."""
+    if not data:
+        logging.error('No settings data provided in save_layout_settings event')
+        return
+
+    if save_layout_settings(data):
+        logging.debug('Layout settings saved successfully')
+    else:
+        logging.error('Error saving layout settings')
 
 
 def get_sound_class_by_name(name):

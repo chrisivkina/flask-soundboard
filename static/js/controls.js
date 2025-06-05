@@ -1,3 +1,21 @@
+// Connect to Socket.IO server at current window location
+const socket = io(window.location.origin);
+
+socket.on('connect', function() {
+    console.log('Connected to socket server');
+});
+
+socket.on('settings', function(data) {
+    console.log('Received settings in socket:', data);
+    sim = data.sim;
+    loop = data.loop;
+    do_push_to_talk = data.do_push_to_talk;
+    paused = data.paused;
+    document.getElementById('volume').value = data.volume;
+
+    updateButtonColors();
+});
+
 function postChangeParameter(parameter) {
     if (parameter === 'simultaneous') {
         sim = !sim;
@@ -45,26 +63,8 @@ function updateButtonColors() {
     }
 }
 
-function syncButtonColorsWithSettings() {
-    refreshSettings().then(() => {
-        updateButtonColors();
-    });
-}
-
 function refreshSettings() {
-    return fetch('/get_settings', {
-        method: 'POST',
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log(data);
-        sim = data.sim;
-        loop = data.loop;
-        do_push_to_talk = data.do_push_to_talk;
-        paused = data.paused;
-        document.getElementById('volume').value = data.volume;
-        return data;
-    });
+    socket.emit('get_settings');  // Server should respond with 'settings' event, handled above
 }
 
 function postAction(action) {
@@ -78,17 +78,11 @@ function postAction(action) {
 }
 
 function postSound(sound) {
-    syncButtonColorsWithSettings();
-
-    console.log('Playing sound w socket:', sound);
-
     socket.emit('play_sound', { sound: sound });
 }
 
 function postVolumeChange() {
     let volume = document.getElementById('volume').value;
-    console.log(volume);
-
     socket.emit('set_volume', { volume: volume });
 }
 
@@ -105,5 +99,20 @@ function toggleFullScreen() {
     } else {
         cancelFullScreen.call(doc);
         fullScreenState = false;
+    }
+}
+
+function deleteSound(soundName) {
+    if (confirm(`Are you sure you want to delete "${soundName}"?`)) {
+        socket.emit('delete_sound', { name: soundName });
+
+        // Listen for confirmation of deletion from the server, only triggers once
+        socket.once('deleted_sound', function(data) {
+            // Remove from localStorage and refresh the view
+            const sounds = JSON.parse(localStorage.getItem('soundCategories'));
+            const updatedSounds = sounds.filter(s => s.name !== soundName);
+            localStorage.setItem('soundCategories', JSON.stringify(updatedSounds));
+            organizeSoundsByCategory();
+        });
     }
 }

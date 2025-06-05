@@ -30,14 +30,8 @@ function saveLayoutSettings() {
         categoryWidths: window.categoryWidths || {},
         categoryOrder: window.categoryOrder || []
     };
-
-    return fetch('/save_layout_settings', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(settings)
-    });
+    
+    socket.emit('save_layout_settings', settings);
 }
 
 function saveNewCategoryOrder() {
@@ -56,13 +50,7 @@ function saveNewCategoryOrder() {
         .filter(item => item !== null);
 
     // Save to server API
-    fetch('/update_category_order', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({categories: categoryOrder})
-    });
+    socket.emit('update_category_order', { categories: categoryOrder });
 
     // Also save to layout settings
     window.categoryOrder = categoryOrder;
@@ -130,4 +118,3 @@ function startResize(e) {
     document.addEventListener('mousemove', resize);
     document.addEventListener('mouseup', stopResize);
 }
-
