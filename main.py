@@ -132,7 +132,8 @@ def compile_settings():
         'simultaneous': simultaneous.get(),
         'loop': loop.get(),
         'do_push_to_talk': do_push_to_talk.get(),
-        'volume': sound_lib.get_volume()
+        'volume': sound_lib.get_volume(),
+        'paused': sound_lib.is_paused()
     }
 
 

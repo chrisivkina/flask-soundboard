@@ -33,7 +33,7 @@
             <div class="grid-1x3">
                 <button onclick="toggleFullScreen()" class="config-button">Toggle Full Screen</button>
                 <button id="layout_toggle_button" class="config-button">Switch to Horizontal Layout</button>
-                <button onclick="" class="config-button">Settings</button>
+                <button class="config-button" disabled>Settings</button>
             </div>
 
             <div class="grid-1x3">
@@ -89,7 +89,7 @@
         const split_img = "{{ url_for('static', filename='split.png') }}";
         const keyboard_img = "{{ url_for('static', filename='keyboard.png') }}";
 
-        document.getElementById('volume').addEventListener('change', postVolumeChange);
+        document.getElementById('volume').addEventListener('input', postVolumeChange);
 
         {% if simultaneous %}
             let sim = true;

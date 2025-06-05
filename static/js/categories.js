@@ -1,3 +1,13 @@
+let contextMenu = null;
+
+// Close menu when clicking elsewhere
+document.addEventListener('click', function(e) {
+    if (contextMenu && !contextMenu.contains(e.target)) {
+        contextMenu.remove();
+    }
+});
+
+
 function organizeSoundsByCategory() {
     const gridContainer = document.querySelector('.grid');
     const soundsData = JSON.parse(localStorage.getItem('soundCategories'));
@@ -111,7 +121,6 @@ function addCategoryToGrid(category, sounds, container) {
 }
 
 function setupContextMenu() {
-    let contextMenu = null;
     const soundButtons = document.querySelectorAll('.sound_button');
 
     // Context menu for desktop (right click)
@@ -136,13 +145,6 @@ function setupContextMenu() {
         button.addEventListener('touchmove', function() {
             clearTimeout(pressTimer);
         });
-    });
-
-    // Close menu when clicking elsewhere
-    document.addEventListener('click', function(e) {
-        if (contextMenu && !contextMenu.contains(e.target)) {
-            contextMenu.remove();
-        }
     });
 
     function showContextMenu(e, button) {
