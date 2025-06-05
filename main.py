@@ -48,6 +48,15 @@ def index():
 @socket.on('connect')
 def handle_connect():
     logging.info('Client connected')
+    socket.emit('settings', compile_settings())  # Send initial settings to the client
+    socket.emit('sound_list', [sound.name for sound in sounds])  # Send initial sound list
+
+
+@socket.on('get_sounds')
+def handle_get_sounds():
+    """Send the list of available sounds to the client."""
+    socket.emit('sound_list', [sound.name for sound in sounds])
+    logging.debug('Sent sounds to client')
 
 
 @socket.on('disconnect')
@@ -170,7 +179,7 @@ def handle_delete_sound(data):
         sfx_files = os.listdir(sfx_dir)
         populate_sounds()
         logging.info(f"Deleted sound {name}")
-        socket.emit('sound_deleted', {'name': name})
+        socket.emit('deleted_sound', {'name': name})
     else:
         logging.error(f'Sound not found: {name}')
 

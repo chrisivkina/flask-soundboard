@@ -15,6 +15,38 @@ socket.on('settings', function(data) {
     updateButtonColors();
 });
 
+// Listen for initial sound list on connect
+socket.on('sound_list', function(soundNames) {
+    let localSounds = JSON.parse(localStorage.getItem('soundCategories')) || [];
+
+    // Create a map for quick lookup
+    const localMap = new Map(localSounds.map(s => [s.name, s]));
+
+    // Add new sounds from server, keep existing data if present
+    const updatedSounds = soundNames.map(name => {
+        if (localMap.has(name)) {
+            return localMap.get(name);
+        } else {
+            return { name: name, category: null, order: 0 };
+        }
+    });
+
+    // Remove sounds not present on the server
+    localSounds.forEach(s => {
+        if (!soundNames.includes(s.name)) {
+            // Do not add to updatedSounds (already handled above)
+        }
+    });
+
+    localStorage.setItem('soundCategories', JSON.stringify(updatedSounds));
+    organizeSoundsByCategory();
+});
+
+// Request sound list if needed (e.g., after deletion or manual refresh)
+function requestSoundList() {
+    socket.emit('get_sounds');
+}
+
 function postChangeParameter(parameter) {
     if (parameter === 'simultaneous') {
         sim = !sim;
