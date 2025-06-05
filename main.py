@@ -140,19 +140,19 @@ def handle_get_settings():
     send_settings()
 
 
-@app.route('/update_sound_category', methods=['POST'])
-def update_sound_category():
-    if 'name' not in request.json or 'category' not in request.json:
-        return 'Missing required fields', 400
+@socket.on('update_sound_category')
+def handle_update_sound_category(data):
+    """Handle the update sound category event from the client."""
+    if 'name' not in data or 'category' not in data:
+        logging.error('Missing name or category in update_sound_category event')
+        return
 
-    name = request.json['name']
-    category = request.json['category']
+    name = data['name']
+    category = data['category']
 
     # Here you would update your sound data structure or database
     # For now we just acknowledge the request
     logging.info(f"Updated sound {name} to category {category}")
-
-    return 'Category updated'
 
 
 @socket.on('delete_sound')
@@ -188,6 +188,26 @@ def handle_update_category_order(data):
     logging.debug(f"Updated category order: {categories}")
 
 
+@socket.on('get_layout_settings')
+def handle_get_layout_settings():
+    """Handle the get layout settings event from the client."""
+    settings = get_layout_settings()
+    socket.emit('layout_settings', settings)
+
+
+@socket.on('save_layout_settings')
+def handle_save_layout_settings(data):
+    """Handle the save layout settings event from the client."""
+    if not data:
+        logging.error('No settings data provided in save_layout_settings event')
+        return
+
+    if save_layout_settings(data):
+        logging.debug('Layout settings saved successfully')
+    else:
+        logging.error('Error saving layout settings')
+
+
 def get_layout_settings():
     """Load layout settings from file or return defaults if file doesn't exist"""
     if not os.path.exists(SETTINGS_FILE):
@@ -218,35 +238,6 @@ def save_layout_settings(settings):
     except Exception as e:
         logging.error(f"Error saving layout settings: {e}")
         return False
-
-
-@app.route('/get_layout_settings', methods=['GET'])
-def get_settings_endpoint():
-    return get_layout_settings()
-
-
-@app.route('/save_layout_settings', methods=['POST'])
-def save_settings_endpoint():
-    if not request.json:
-        return 'Invalid settings data', 400
-
-    if save_layout_settings(request.json):
-        return 'Settings saved successfully'
-    else:
-        return 'Error saving settings', 500
-
-
-@socket.on('save_layout_settings')
-def handle_save_layout_settings(data):
-    """Handle the save layout settings event from the client."""
-    if not data:
-        logging.error('No settings data provided in save_layout_settings event')
-        return
-
-    if save_layout_settings(data):
-        logging.debug('Layout settings saved successfully')
-    else:
-        logging.error('Error saving layout settings')
 
 
 def get_sound_class_by_name(name):

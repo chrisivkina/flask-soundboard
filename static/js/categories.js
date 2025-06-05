@@ -251,6 +251,8 @@ function setCategory(soundName, category) {
             },
             body: JSON.stringify({name: soundName, category: sound.category})
         });
+
+        socket.emit('update_sound_category', {name: soundName, category: sound.category});
     }
 }
 

@@ -1,27 +1,18 @@
 function loadLayoutSettings() {
-    return fetch('/get_layout_settings')
-        .then(response => response.json())
-        .then(settings => {
-            // Set layout mode
-            if (settings.layoutMode) {
-                localStorage.setItem('categoryLayout', settings.layoutMode);
-            }
+    socket.emit('get_layout_settings');
 
-            // Store category widths for later use
-            window.categoryWidths = settings.categoryWidths || {};
-            window.categoryOrder = settings.categoryOrder || [];
+    socket.once('layout_settings', (settings) => {
+        // Set layout mode
+        if (settings.layoutMode) {
+            localStorage.setItem('categoryLayout', settings.layoutMode);
+        }
 
-            return settings;
-        })
-        .catch(error => {
-            console.error('Error loading layout settings:', error);
-            // Use defaults if loading fails
-            return {
-                layoutMode: "vertical",
-                categoryWidths: {},
-                categoryOrder: []
-            };
-        });
+        // Store category widths for later use
+        window.categoryWidths = settings.categoryWidths || {};
+        window.categoryOrder = settings.categoryOrder || [];
+
+        return settings;
+    });
 }
 
 function saveLayoutSettings() {
@@ -30,7 +21,7 @@ function saveLayoutSettings() {
         categoryWidths: window.categoryWidths || {},
         categoryOrder: window.categoryOrder || []
     };
-    
+
     socket.emit('save_layout_settings', settings);
 }
 
