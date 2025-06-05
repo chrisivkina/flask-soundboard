@@ -1,3 +1,7 @@
+""""
+This module provides functions to simulate keyboard input on Windows using the ctypes library.
+"""
+
 import ctypes
 from ctypes import wintypes
 
@@ -19,7 +23,6 @@ VK_TAB = 0x09
 VK_MENU = 0x12
 
 # C struct definitions
-
 wintypes.ULONG_PTR = wintypes.WPARAM
 
 
@@ -81,8 +84,6 @@ user32.SendInput.argtypes = (wintypes.UINT,  # nInputs
 
 
 # Functions
-
-
 def PressKey(hexKeyCode):
     x = INPUT(type=INPUT_KEYBOARD,
               ki=KEYBDINPUT(wVk=hexKeyCode))

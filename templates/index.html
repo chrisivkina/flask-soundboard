@@ -5,54 +5,55 @@
     <title>Soundboard</title>
 
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+    <script src="{{ url_for('static', filename='js/socket.io.min.js') }}"></script>
+
+    <script src="{{ url_for('static', filename='js/layout.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/categories.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/controls.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 
     <style>
         img {
             width: 48px;
             height: 48px;
         }
+
+        .config-button {
+            padding:10px !important;
+            font-size:1rem;
+            background-color: var(--main);
+            color:var(--headline);
+        }
     </style>
 </head>
 <body style="height:100%;margin:0;">
     <div class="flex-container">
         <div class="flex-content">
-            <div class="grid-1x2">
-                <button onclick="toggleFullScreen()" style="padding:10px !important;font-size:1rem;background-color: var(--main);color:var(--headline)">Toggle Full Screen</button>
-                <button onclick="location.reload()" style="padding:10px !important;font-size:1rem;background-color: var(--main);color:var(--headline)">Refresh</button>
+            <div class="grid-1x3">
+                <button onclick="toggleFullScreen()" class="config-button">Toggle Full Screen</button>
+                <button id="layout_toggle_button" class="config-button">Switch to Horizontal Layout</button>
+                <button class="config-button" disabled>Settings</button>
             </div>
 
             <div class="grid-1x3">
-                <button style="padding:20px !important;"  id="loop_button" onclick="postChangeParameter('loop')">
+                <button style="padding:20px !important;"  id="loop_button" onclick="postChangeParameter('loop')" title='Toggle loop on/off'>
                     <img id="loop_button_img" src="{{ url_for('static', filename='loop.png') }}" alt="Loop">
                 </button>
 
-                <button style="padding:20px !important;"  id="keyboard_button" onclick="postChangeParameter('do_push_to_talk')">
-                    <img id="keyboard_button_img" src="{{ url_for('static', filename='keyboard.png') }}" alt="Loop">
+                <button style="padding:20px !important;"  id="keyboard_button" onclick="postChangeParameter('do_push_to_talk')" title='Toggle push-to-talk'>
+                    <img id="keyboard_button_img" src="{{ url_for('static', filename='keyboard.png') }}" alt="Push to Talk">
                 </button>
 
-                <button style="padding:20px !important;"  id="sim_button" onclick="postChangeParameter('simultaneous')">
+                <button style="padding:20px !important;"  id="sim_button" onclick="postChangeParameter('simultaneous')" title='Toggle simultaneous playback'>
                     <img id="sim_button_img" src="{{ url_for('static', filename='split.png') }}" alt="Simultaneous">
                 </button>
             </div>
 
             <br>
             <div class="grid">
-                {% for sound in sounds %}
-                    {% if sound not in sounds_category_2 %}
-                        <div class="sound_button" onclick="postSound('{{ sound.name }}')">{{ sound.name }}</div>
-                    {% endif %}
-                {% endfor %}
+                <!-- Sound buttons will be rendered by JS after layout settings are loaded -->
             </div>
-
-            {% if sounds_category_2 %}
-                <br>
-                <div class="grid">
-                    {% for sound in sounds_category_2 %}
-                        <div class="sound_button" onclick="postSound('{{ sound.name }}')">{{ sound.name }}</div>
-                    {% endfor %}
-                </div>
-            {% endif %}
         </div>
         <div class="fixed-footer">
             <div class="grid-1x3">
@@ -114,8 +115,8 @@
             let do_push_to_talk = false;
         {% endif %}
 
-        syncButtonColorsWithSettings();
         refreshSettings();
     </script>
 </body>
 </html>
+
