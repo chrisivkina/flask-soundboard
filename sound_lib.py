@@ -1,7 +1,15 @@
+"""
+An abstraction layer for sound playback using sbsdl2.
+"""
+
 from common import *
 import sbsdl2
 import keyboard_lib as kb
+
 import time
+import threading
+import random
+import logging
 
 
 class Sound:

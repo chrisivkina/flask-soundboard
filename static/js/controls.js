@@ -9,15 +9,7 @@ function postChangeParameter(parameter) {
 
     updateButtonColors();
 
-    fetch('/change_parameter', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({parameter: parameter})
-    }).then(() => {
-        refreshSettings();
-    });
+    socket.emit('toggle_parameter', { parameter: parameter });
 }
 
 function updateButtonColors() {
@@ -25,22 +17,25 @@ function updateButtonColors() {
     let simButton = document.getElementById('sim_button');
     let keyboard_button = document.getElementById('keyboard_button');
 
+    const on_color = '#137800';
+    const off_color = '#c50000';
+
     if (loop) {
-        loopButton.style.backgroundColor = '#137800';
+        loopButton.style.backgroundColor = on_color;
     } else {
-        loopButton.style.backgroundColor = '#c50000';
+        loopButton.style.backgroundColor = off_color;
     }
 
     if (sim) {
-        simButton.style.backgroundColor = '#137800';
+        simButton.style.backgroundColor = on_color;
     } else {
-        simButton.style.backgroundColor = '#c50000';
+        simButton.style.backgroundColor = off_color;
     }
 
     if (do_push_to_talk) {
-        keyboard_button.style.backgroundColor = '#137800';
+        keyboard_button.style.backgroundColor = on_color;
     } else {
-        keyboard_button.style.backgroundColor = '#c50000';
+        keyboard_button.style.backgroundColor = off_color;
     }
 
     if (paused) {
@@ -79,40 +74,22 @@ function postAction(action) {
 
     updateButtonColors();
 
-    fetch('/action', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({action: action})
-    }).then(() => {
-        refreshSettings();
-    });
+    socket.emit(action);
 }
 
 function postSound(sound) {
     syncButtonColorsWithSettings();
 
-    fetch('/play', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({sound: sound})
-    });
+    console.log('Playing sound w socket:', sound);
+
+    socket.emit('play_sound', { sound: sound });
 }
 
 function postVolumeChange() {
     let volume = document.getElementById('volume').value;
     console.log(volume);
 
-    fetch('/change_volume', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({volume: volume})
-    });
+    socket.emit('set_volume', { volume: volume });
 }
 
 function toggleFullScreen() {

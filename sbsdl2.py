@@ -1,21 +1,14 @@
+"""
+A simple wrapper around SDL2_mixer for audio playback.
+"""
+
 from ctypes import c_char_p
-from common import *
-
-
-os.environ['PYSDL2_DLL_PATH'] = os.path.join(
-    getattr(
-        sys,
-        '_MEIPASS',
-        os.path.dirname(os.path.abspath(__file__))
-    ),
-    'bin',
-    'sdl2'
-)
-
+import threading
+import logging
 import sdl2.sdlmixer as mixer
 import sdl2
 
-current_volume = 64
+current_volume = None  # to be set in init()
 
 
 def init(
@@ -28,6 +21,8 @@ def init(
         starting_volume: int = 64,
         audio_channels: int = 256
 ):
+    global current_volume
+
     sdl2.SDL_InitSubSystem(sdl2.SDL_INIT_AUDIO)
     if _device is None:
         _device = find_audio_device('vb-audio virtual cable')
@@ -53,6 +48,7 @@ def init(
 
     mixer.Mix_AllocateChannels(audio_channels)
     mixer.Mix_Volume(-1, starting_volume)  # volume to half on all channels
+    current_volume = starting_volume
 
 
 def get_audio_devices(rec: bool = False):

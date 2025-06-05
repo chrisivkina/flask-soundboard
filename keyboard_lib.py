@@ -1,3 +1,7 @@
+""""
+This module provides functions to simulate keyboard input on Windows using the ctypes library.
+"""
+
 import ctypes
 from ctypes import wintypes
 

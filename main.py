@@ -1,11 +1,18 @@
+"""
+Main application file for the soundboard web application.
+"""
+
 from flask import Flask, render_template, request, send_from_directory
+from flask_socketio import SocketIO
+
 import atexit
 import json
 import os
+import logging
 
 import sound_lib
 import sbsdl2 as sound_backend
-from common import *
+from common import simultaneous, loop, do_push_to_talk, sfx_dir
 
 # Path to the layout settings file
 SETTINGS_FILE = os.path.join(os.path.dirname(__file__), 'data', 'layout_settings.json')
@@ -15,10 +22,7 @@ os.makedirs(os.path.dirname(SETTINGS_FILE), exist_ok=True)
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(24)
-app.config['HOST'] = '0.0.0.0'
-app.config['PORT'] = 8080
-app.config['DEBUG'] = True
-app.config['TEMPLATES_AUTO_RELOAD'] = True
+socket = SocketIO(app, cors_allowed_origins='*')
 
 
 @app.route('/favicon.ico')
@@ -27,7 +31,8 @@ def favicon():
 
 
 @app.route('/')
-def index():  # put application's code here
+def index():
+    """Render the main index page with sound data and parameters."""
     return render_template(
         'index.html',
         sounds=sounds,
@@ -39,70 +44,75 @@ def index():  # put application's code here
     )
 
 
-@app.route('/play', methods=['POST'])
-def play():
-    if 'sound' not in request.json.keys():
-        return 'No sound provided'
-
-    to_play = request.json['sound']
-    s = get_sound_class_by_name(to_play)
-    s.play()
-
-    return 'Playing sound'
+@socket.on('connect')
+def handle_connect():
+    logging.info('Client connected')
 
 
-@app.route('/print_debug_info', methods=['POST'])
-def print_debug_info():
-    sound_lib.print_debug_info()
-    return 'Printed debug info'
+@socket.on('disconnect')
+def handle_disconnect():
+    logging.info('Client disconnected')
 
 
-@app.route('/change_parameter', methods=['POST'])
-def change_parameter():
-    if 'parameter' not in request.json.keys():
-        return 'No parameter provided'
+@socket.on('play_sound')
+def handle_play_sound(data):
+    if 'sound' not in data:
+        logging.error('No sound provided in play_sound event')
+        return
 
-    parameter = request.json['parameter']
+    sound_name = data['sound']
+    sound_class = get_sound_class_by_name(sound_name)
+    if sound_class:
+        sound_class.play()
+        logging.debug(f'Playing sound: {sound_name}')
+    else:
+        logging.error(f'Sound not found: {sound_name}')
+
+
+@socket.on('toggle_parameter')
+def handle_toggle_parameter(data):
+    """Toggle a parameter based on the event data."""
+    parameter = data['parameter']
     if parameter == 'simultaneous':
-        simultaneous.set(not simultaneous.get())
+        simultaneous.toggle()
     elif parameter == 'loop':
-        loop.set(not loop.get())
+        loop.toggle()
     elif parameter == 'do_push_to_talk':
-        do_push_to_talk.set(not do_push_to_talk.get())
+        do_push_to_talk.toggle()
     else:
-        return 'Invalid parameter'
+        logging.error(f'Invalid parameter: {parameter}')
+        return
 
-    return 'Changed parameter'
+    logging.debug(f'Toggled parameter: {parameter}')
 
 
-@app.route('/change_volume', methods=['POST'])
-def change_volume():
-    if 'volume' not in request.json.keys():
-        return 'No volume provided'
-
-    volume = request.json['volume']
-
+@socket.on('set_volume')
+def handle_volume_change(data):
+    """Change the volume based on the event data."""
+    volume = data['volume']
     sound_lib.change_volume(int(volume))
+    logging.debug(f'Volume changed to: {volume}')
 
-    return 'Changed volume'
+
+@socket.on('pause_or_resume')
+def handle_pause_or_resume():
+    """Toggle pause or resume playback."""
+    sound_lib.handle_pause_or_resume()
+    logging.debug('Toggled pause/resume')
 
 
-@app.route('/action', methods=['POST'])
-def action():
-    if 'action' not in request.json.keys():
-        return 'No action provided'
+@socket.on('stop')
+def handle_stop():
+    """Stop playback of all sounds."""
+    sound_lib.stop()
+    logging.debug('Stopped playback')
 
-    a = request.json['action']
-    if a == 'pause_or_resume':
-        sound_lib.handle_pause_or_resume()
-    elif a == 'stop':
-        sound_lib.stop()
-    elif a == 'random':
-        sound_lib.random_sound(sounds)
-    else:
-        return 'Invalid action'
 
-    return 'Performed action'
+@socket.on('random')
+def handle_random_sound():
+    """Play a random sound from the available sounds."""
+    sound_lib.random_sound(sounds)
+    logging.debug('Played random sound')
 
 
 @app.route('/get_settings', methods=['POST'])
@@ -113,6 +123,19 @@ def get_settings():
         'do_push_to_talk': do_push_to_talk.get(),
         'volume': sound_lib.get_volume()
     }
+
+
+@socket.on('get_settings')
+def handle_get_settings():
+    """Send the current settings to the client."""
+    settings = {
+        'simultaneous': simultaneous.get(),
+        'loop': loop.get(),
+        'do_push_to_talk': do_push_to_talk.get(),
+        'volume': sound_lib.get_volume()
+    }
+    socket.emit('settings', settings)
+    logging.debug('Sent current settings to client')
 
 
 @app.route('/update_sound_category', methods=['POST'])
@@ -219,10 +242,10 @@ def get_sound_class_by_name(name):
 def run():
     sound_backend.init()
 
-    # Register the function to be called on exit
+    # Register sound_lib destructor function to be called on exit
     atexit.register(sound_lib.on_closing)
 
-    app.run(host='0.0.0.0', port=8080, debug=True)
+    socket.run(app, host='0.0.0.0', port=8080, debug=True, allow_unsafe_werkzeug=True)
 
 
 sfx_files = os.listdir(sfx_dir)
