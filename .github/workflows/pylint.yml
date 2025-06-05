@@ -24,9 +24,25 @@ jobs:
         pip install pylint
         pip install -r requirements.txt
 
-    - name: Analyse with Pylint (diagnostic)
+    - name: Run Pylint (require score ≥ 9.0)
       run: |
-        set -e
-        echo "Running Pylint on the following files:"
-        git ls-files '*.py'
-        pylint --exit-zero --disable=C,R $(git ls-files '*.py')
+        echo "Running Pylint and enforcing minimum score of 9.0..."
+        FILES=$(git ls-files '*.py')
+        pylint --disable=C,R $FILES | tee pylint.log
+
+        # Extract the score from the last line
+        SCORE=$(tail -n 10 pylint.log | grep "Your code has been rated at" | awk '{print $7}' | cut -d'/' -f1)
+
+        echo "Pylint score: $SCORE"
+
+        # Compare score to threshold (fail if < 9.0)
+        THRESHOLD=9.0
+        result=$(awk -v s="$SCORE" -v t="$THRESHOLD" 'BEGIN { print (s>=t) ? "pass" : "fail" }')
+
+        if [ "$result" = "fail" ]; then
+          echo "Pylint score $SCORE is below threshold $THRESHOLD"
+          exit 1
+        else
+          echo "Pylint score $SCORE meets the threshold"
+        fi
+    
