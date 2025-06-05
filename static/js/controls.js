@@ -6,7 +6,6 @@ socket.on('connect', function() {
 });
 
 socket.on('settings', function(data) {
-    console.log('Received settings in socket:', data);
     sim = data.sim;
     loop = data.loop;
     do_push_to_talk = data.do_push_to_talk;

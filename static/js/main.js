@@ -15,14 +15,7 @@ document.addEventListener('DOMContentLoaded', function() {
         localStorage.setItem('soundCategories', JSON.stringify(sounds));
     }
 
-    // Load layout settings from server
-    loadLayoutSettings().then(() => {
-        // Setup context menu
-        setupContextMenu();
-
-        // Organize and display sounds by categories
-        organizeSoundsByCategory();
-    });
+    loadLayoutSettings();
 
     // Set up layout toggle button
     const layoutBtn = document.getElementById('layout_toggle_button');

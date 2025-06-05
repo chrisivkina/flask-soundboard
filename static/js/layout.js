@@ -11,6 +11,12 @@ function loadLayoutSettings() {
         window.categoryWidths = settings.categoryWidths || {};
         window.categoryOrder = settings.categoryOrder || [];
 
+        // Setup context menu
+        setupContextMenu();
+
+        // Organize and display sounds by categories
+        organizeSoundsByCategory();
+
         return settings;
     });
 }

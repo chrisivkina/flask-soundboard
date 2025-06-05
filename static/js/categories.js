@@ -243,15 +243,6 @@ function setCategory(soundName, category) {
         sound.category = category === '' ? null : category;
         localStorage.setItem('soundCategories', JSON.stringify(sounds));
 
-        // Save to server
-        fetch('/update_sound_category', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({name: soundName, category: sound.category})
-        });
-
         socket.emit('update_sound_category', {name: soundName, category: sound.category});
     }
 }
